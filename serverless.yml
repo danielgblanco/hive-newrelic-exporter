@@ -1,0 +1,32 @@
+service: hive-newrelic-exporter
+
+frameworkVersion: '2'
+variablesResolutionMode: 20210326
+
+provider:
+  name: aws
+  runtime: python3.8
+  lambdaHashingVersion: 20201221
+
+  stage: main
+  region: eu-west-1
+
+  environment:
+    NEWRELIC_REGION: EU
+    NEWRELIC_INSERT_KEY: ${ssm:/newrelic_insert_key}
+    ID_TOKEN: ${ssm:/hive_id_token}
+    REFRESH_TOKEN: ${ssm:/hive_refresh_token}
+    ACCESS_TOKEN: ${ssm:/hive_access_token}
+    HOME: /tmp
+
+functions:
+  export:
+    handler: handler.lambda_handler
+    events:
+      - schedule: rate(1 minute)
+
+plugins:
+  - serverless-python-requirements
+custom:
+  pythonRequirements:
+    dockerizePip: non-linux
